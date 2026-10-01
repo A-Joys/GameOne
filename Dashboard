@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Classroom Dashboard</title>
+  <style>
+    :root {
+      --bg: #f4f6f9;
+      --card-bg: #ffffff;
+      --primary: #4a90e2;
+      --success: #2ecc71;
+      --danger: #e74c3c;
+      --text: #2c3e50;
+      --secondary: #95a5a6;
+      --accent: #8e44ad;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      gap: 10px;
+    }
+
+    .title-edit-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    h1 { margin: 0; color: var(--primary); }
+
+    .edit-icon-btn {
+      background: none;
+      border: none;
+      color: var(--secondary);
+      font-size: 1.1rem;
+      cursor: pointer;
+      padding: 4px;
+    }
+    .edit-icon-btn:hover { color: var(--primary); }
+
+    .btn-nav { background-color: var(--secondary); }
+
+    .add-student-bar {
+      background: var(--card-bg);
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+      margin-bottom: 20px;
+      display: flex;
+      gap: 10px;
+    }
+
+    .input-group {
+      display: flex;
+      gap: 8px;
+      width: 100%;
+    }
+
+    input[type="text"], input[type="number"] {
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 1rem;
+    }
+
+    input[type="text"] { flex: 1; }
+    input[type="number"] { width: 70px; }
+
+    button {
+      padding: 8px 15px;
+      border: none;
+      border-radius: 5px;
+      background-color: var(--primary);
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+      transition: opacity 0.2s;
+    }
+
+    button:hover { opacity: 0.9; }
+
+    /* Student Grid Priority */
+    .section-title {
+      color: #7f8c8d;
+      margin: 25px 0 15px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 15px;
+      text-align: center;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+      position: relative;
+    }
+
+    .class-card {
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .class-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+    }
+
+    .avatar-wrapper {
+      position: relative;
+      width: 70px;
+      height: 70px;
+      margin: 0 auto 10px;
+    }
+
+    .avatar {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: #e0e0e0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      object-fit: cover;
+      overflow: hidden;
+    }
+
+    .avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .avatar-upload-label {
+      position: absolute;
+      bottom: -2px;
+      right: -2px;
+      background: var(--primary);
+      color: white;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .avatar-upload-input { display: none; }
+
+    .student-name, .class-name {
+      font-weight: bold;
+      margin-bottom: 8px;
+      word-break: break-word;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+    }
+
+    .points-badge {
+      display: inline-block;
+      width: 36px;
+      height: 36px;
+      line-height: 36px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: white;
+      font-weight: bold;
+      font-size: 1.1rem;
+      margin-bottom: 10px;
+    }
+
+    .point-actions {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-add { background-color: var(--success); }
+    .btn-sub { background-color: var(--danger); }
+    .btn-accent { background-color: var(--accent); }
+    
+    .delete-btn {
+      position: absolute;
+      top: 5px;
+      right: 8px;
+      background: none;
+      color: #999;
+      font-size: 1.2rem;
+      padding: 0;
+    }
+    .delete-btn:hover { color: var(--danger); }
+
+    /* Secondary Features Section Below */
+    .toolbar-bottom {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 15px;
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 2px dashed #e0e0e0;
+    }
+
+    .panel {
+      background: var(--card-bg);
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+
+    .panel h2 {
+      margin-top: 0;
+      font-size: 1rem;
+      color: #7f8c8d;
+    }
+
+    .timer-display {
+      font-size: 1.8rem;
+      font-weight: bold;
+      text-align: center;
+      margin: 5px 0;
+      font-family: monospace;
+    }
+
+    .timer-inputs {
+      display: flex;
+      justify-content: center;
+      gap: 5px;
+      margin-bottom: 8px;
+      align-items: center;
+    }
+
+    .timer-controls {
+      display: flex;
+      justify-content: center;
+      gap: 5px;
+    }
+
+    .picker-display {
+      text-align: center;
+      font-size: 1.2rem;
+      font-weight: bold;
+      min-height: 35px;
+      margin: 5px 0;
+      color: var(--accent);
+    }
+
+    .view { display: none; }
+    .view.active { display: block; }
+
+    /* Group Maker Styles */
+    .groups-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .group-card {
+      background: var(--card-bg);
+      border-radius: 8px;
+      padding: 12px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      border-top: 4px solid var(--accent);
+    }
+
+    .group-card h3 {
+      margin: 0 0 8px 0;
+      font-size: 1rem;
+      color: var(--accent);
+    }
+
+    .group-card ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .group-card li {
+      padding: 4px 0;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .group-card li:last-child { border-bottom: none; }
+
+    .group-avatar-mini {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+    .modal-overlay.active { display: flex; }
+
+    .modal {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      max-width: 500px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    .modal-header h2 { margin: 0; }
+
+    .feedback-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 12px;
+      margin-bottom: 15px;
+    }
+
+    .feedback-item {
+      border: 2px solid #eee;
+      border-radius: 8px;
+      padding: 10px;
+      text-align: center;
+      cursor: pointer;
+    }
+    .feedback-item:hover { border-color: var(--primary); }
+    .feedback-item .icon { font-size: 2rem; display: block; }
+    .feedback-item .label { font-size: 0.8rem; font-weight: bold; margin-top: 5px; }
+    .feedback-item .pts { font-size: 0.8rem; font-weight: bold; margin-top: 2px; }
+    .feedback-item.positive .pts { color: var(--success); }
+    .feedback-item.negative .pts { color: var(--danger); }
+
+    .manage-item-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+      align-items: center;
+    }
+
+    /* Feedback Animation Overlay */
+    .feedback-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      opacity: 0;
+      transition: opacity 0.2s ease-in-out;
+    }
+    .feedback-overlay.show { opacity: 1; }
+    
+    .feedback-content {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 30px 50px;
+      border-radius: 20px;
+      text-align: center;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+      transform: scale(0.8);
+      transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .feedback-overlay.show .feedback-content { transform: scale(1); }
+    .feedback-content .icon { font-size: 5rem; display: block; margin-bottom: 10px; }
+    .feedback-content .title { font-size: 1.5rem; font-weight: bold; }
+    .feedback-content .points { font-size: 1.8rem; font-weight: bold; margin-top: 5px; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div id="homeView" class="view active">
+      <header>
+        <div class="title-edit-container">
+          <h1 id="dashboardTitleDisplay">Classroom Dashboard</h1>
+          <button class="edit-icon-btn" onclick="editDashboardTitle()" title="Edit Dashboard Name">✏️</button>
+        </div>
+      </header>
+
+      <div class="add-student-bar">
+        <div class="input-group">
+          <input type="text" id="classNameInput" placeholder="Enter new class name and press Enter..." onkeydown="handleClassEnter(event)">
+          <button onclick="addClass()">Create Class</button>
+        </div>
+      </div>
+
+      <div class="grid" id="classList"></div>
+    </div>
+
+    <div id="classView" class="view">
+      <header>
+        <button class="btn-nav" onclick="showHome()">&larr; Back to Classes</button>
+        <div class="title-edit-container">
+          <h1 id="currentClassName">Classroom</h1>
+          <button class="edit-icon-btn" onclick="editCurrentClassName()" title="Edit Class Name">✏️</button>
+        </div>
+      </header>
+
+      <div class="add-student-bar">
+        <div class="input-group">
+          <input type="text" id="studentInput" placeholder="Add student name and press Enter..." onkeydown="handleStudentEnter(event)">
+          <button onclick="addStudent()">Add Student</button>
+        </div>
+      </div>
+
+      <div class="section-title">
+        <h2 style="margin: 0;">Students</h2>
+        <button class="btn-nav" onclick="openManageBehaviorsModal()">⚙️ Edit Award Types</button>
+      </div>
+
+      <div class="grid" id="studentGrid"></div>
+
+      <div id="groupsDisplay" class="groups-container"></div>
+
+      <div class="toolbar-bottom">
+        <div class="panel">
+          <h2>Whole Class Award</h2>
+          <button style="width: 100%; margin-bottom: 8px; background-color: var(--success);" onclick="openFeedbackModal('class', null, 'positive')">+ Give Class Points</button>
+          <button style="width: 100%; background-color: var(--danger);" onclick="openFeedbackModal('class', null, 'negative')">- Deduct Class Points</button>
+        </div>
+
+        <div class="panel">
+          <h2>Random Picker</h2>
+          <div class="picker-display" id="pickerDisplay">---</div>
+          <button style="width: 100%;" onclick="pickRandomStudent()">Pick Student</button>
+        </div>
+
+        <div class="panel">
+          <h2>Timer</h2>
+          <div class="timer-display" id="timerDisplay">00:00</div>
+          <div class="timer-inputs">
+            <input type="number" id="timerMins" min="0" placeholder="Min" value="1"> m
+            <input type="number" id="timerSecs" min="0" max="59" placeholder="Sec" value="0"> s
+          </div>
+          <div class="timer-controls">
+            <button class="btn-add" onclick="setTimer()">Start</button>
+            <button style="background-color: var(--danger);" onclick="resetTimer()">Reset</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>Group Maker</h2>
+          <div class="input-group" style="margin-bottom: 10px;">
+            <input type="number" id="groupCount" min="2" max="20" value="3" style="width: 100%;">
+            <span style="align-self: center; font-size: 0.85rem; color: #7f8c8d;">groups</span>
+          </div>
+          <button class="btn-accent" style="width: 100%;" onclick="createGroups()">Generate Groups</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="feedbackModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="feedbackModalTitle">Select Feedback</h2>
+        <button class="edit-icon-btn" onclick="closeModal('feedbackModal')">✖</button>
+      </div>
+      <div class="feedback-grid" id="feedbackGrid"></div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="manageBehaviorsModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Edit Award Types</h2>
+        <button class="edit-icon-btn" onclick="closeModal('manageBehaviorsModal')">✖</button>
+      </div>
+      <div id="behaviorList"></div>
+      <button style="width: 100%; margin-top: 10px;" onclick="addNewBehavior()">+ Add Award Type</button>
+    </div>
+  </div>
+
+  <div class="feedback-overlay" id="feedbackOverlay">
+    <div class="feedback-content" id="feedbackContent">
+      <span class="icon" id="animIcon">👍</span>
+      <div class="title" id="animTitle">Great Job!</div>
+      <div class="points" id="animPoints">+1</div>
+    </div>
+  </div>
+
+  <script>
+    let dashboardTitle = localStorage.getItem('classroom_dashboard_title') || 'Classroom Dashboard';
+    let classes = JSON.parse(localStorage.getItem('classroom_app_data')) || [];
+    let currentClassId = null;
+    let timerInterval = null;
+    let timeLeft = 0;
+
+    let defaultBehaviors = [
+      { id: '1', name: 'Helping Others', icon: '👍', points: 1, type: 'positive' },
+      { id: '2', name: 'On Task', icon: '⭐', points: 2, type: 'positive' },
+      { id: '3', name: 'Great Answer', icon: '💡', points: 3, type: 'positive' },
+      { id: '4', name: 'Teamwork', icon: '🙌', points: 5, type: 'positive' },
+      { id: '5', name: 'Disruptive', icon: '👎', points: -1, type: 'negative' },
+      { id: '6', name: 'No Homework', icon: '📝', points: -2, type: 'negative' },
+      { id: '7', name: 'Off Task', icon: '⚠️', points: -3, type: 'negative' }
+    ];
+
+    let behaviors = JSON.parse(localStorage.getItem('classroom_behaviors')) || defaultBehaviors;
+    const avatars = ['🐶', '🐱', '🦊', '🐼', '🐨', '🦁', '🐯', '🐸', '🦄', '🐙'];
+
+    let activeTarget = { type: 'single', studentId: null, mode: 'positive' };
+
+    function saveData() {
+      localStorage.setItem('classroom_app_data', JSON.stringify(classes));
+      localStorage.setItem('classroom_dashboard_title', dashboardTitle);
+      localStorage.setItem('classroom_behaviors', JSON.stringify(behaviors));
+    }
+
+    /* KEY LISTENERS FOR EASY ENTER ADDING */
+    function handleStudentEnter(event) {
+      if (event.key === 'Enter') {
+        addStudent();
+      }
+    }
+
+    function handleClassEnter(event) {
+      if (event.key === 'Enter') {
+        addClass();
+      }
+    }
+
+    /* AUDIO SYNTHESIZER */
+    function playAudio(type) {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        if (type === 'positive') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(523.25, ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.3);
+          gain.gain.setValueAtTime(0.3, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.3);
+        } else {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(300, ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(120, ctx.currentTime + 0.3);
+          gain.gain.setValueAtTime(0.3, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.3);
+        }
+      } catch (e) {}
+    }
+
+    /* ANIMATION OVERLAY */
+    function triggerAnimation(icon, title, points, type) {
+      const overlay = document.getElementById('feedbackOverlay');
+      const animIcon = document.getElementById('animIcon');
+      const animTitle = document.getElementById('animTitle');
+      const animPoints = document.getElementById('animPoints');
+
+      animIcon.innerText = icon;
+      animTitle.innerText = title;
+      animPoints.innerText = (points > 0 ? '+' : '') + points;
+      animPoints.style.color = type === 'positive' ? 'var(--success)' : 'var(--danger)';
+
+      playAudio(type);
+
+      overlay.classList.add('show');
+      setTimeout(() => {
+        overlay.classList.remove('show');
+      }, 1200);
+    }
+
+    /* MODAL MANAGERS */
+    function openModal(id) { document.getElementById(id).classList.add('active'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+    function openFeedbackModal(targetType, studentId, mode) {
+      activeTarget = { type: targetType, studentId: studentId, mode: mode };
+      const grid = document.getElementById('feedbackGrid');
+      const title = document.getElementById('feedbackModalTitle');
+      grid.innerHTML = '';
+
+      title.innerText = mode === 'positive' ? 'Award Point(s)' : 'Deduct Point(s)';
+      const filtered = behaviors.filter(b => mode === 'positive' ? b.points > 0 : b.points < 0);
+
+      filtered.forEach(b => {
+        const item = document.createElement('div');
+        item.className = `feedback-item ${b.type}`;
+        item.onclick = () => applyFeedback(b);
+        item.innerHTML = `
+          <span class="icon">${b.icon}</span>
+          <div class="label">${escapeHtml(b.name)}</div>
+          <div class="pts">${b.points > 0 ? '+' : ''}${b.points}</div>
+        `;
+        grid.appendChild(item);
+      });
+
+      openModal('feedbackModal');
+    }
+
+    function applyFeedback(behavior) {
+      closeModal('feedbackModal');
+      const currentClass = classes.find(c => c.id === currentClassId);
+      if (!currentClass) return;
+
+      if (activeTarget.type === 'class') {
+        currentClass.students.forEach(s => s.points += behavior.points);
+        triggerAnimation(behavior.icon, `Class: ${behavior.name}`, behavior.points, behavior.type);
+      } else if (activeTarget.type === 'single') {
+        const student = currentClass.students.find(s => s.id === activeTarget.studentId);
+        if (student) {
+          student.points += behavior.points;
+          triggerAnimation(behavior.icon, `${student.name}: ${behavior.name}`, behavior.points, behavior.type);
+        }
+      }
+
+      saveData();
+      renderStudents();
+    }
+
+    function openManageBehaviorsModal() {
+      renderBehaviorList();
+      openModal('manageBehaviorsModal');
+    }
+
+    function renderBehaviorList() {
+      const container = document.getElementById('behaviorList');
+      container.innerHTML = '';
+
+      behaviors.forEach((b, index) => {
+        const row = document.createElement('div');
+        row.className = 'manage-item-row';
+        row.innerHTML = `
+          <input type="text" value="${b.icon}" style="width: 40px; text-align: center;" onchange="updateBehavior(${index}, 'icon', this.value)">
+          <input type="text" value="${escapeHtml(b.name)}" style="flex:1;" onchange="updateBehavior(${index}, 'name', this.value)">
+          <input type="number" value="${b.points}" style="width: 60px;" onchange="updateBehavior(${index}, 'points', parseInt(this.value)||0)">
+          <button style="background-color: var(--danger); padding: 5px 10px;" onclick="deleteBehavior(${index})">&times;</button>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function updateBehavior(index, key, value) {
+      behaviors[index][key] = value;
+      if (key === 'points') {
+        behaviors[index].type = value >= 0 ? 'positive' : 'negative';
+      }
+      saveData();
+    }
+
+    function addNewBehavior() {
+      behaviors.push({ id: Date.now().toString(), name: 'New Award', icon: '⭐', points: 1, type: 'positive' });
+      saveData();
+      renderBehaviorList();
+    }
+
+    function deleteBehavior(index) {
+      behaviors.splice(index, 1);
+      saveData();
+      renderBehaviorList();
+    }
+
+    /* DASHBOARD TITLE EDIT */
+    function editDashboardTitle() {
+      const newTitle = prompt("Enter new dashboard title:", dashboardTitle);
+      if (newTitle && newTitle.trim() !== "") {
+        dashboardTitle = newTitle.trim();
+        saveData();
+        renderDashboardTitle();
+      }
+    }
+
+    function renderDashboardTitle() {
+      document.getElementById('dashboardTitleDisplay').innerText = dashboardTitle;
+    }
+
+    /* NAVIGATION */
+    function showHome() {
+      currentClassId = null;
+      document.getElementById('homeView').classList.add('active');
+      document.getElementById('classView').classList.remove('active');
+      renderClasses();
+      renderDashboardTitle();
+    }
+
+    function openClass(id) {
+      currentClassId = id;
+      const currentClass = classes.find(c => c.id === id);
+      if (!currentClass) return;
+
+      document.getElementById('currentClassName').innerText = currentClass.name;
+      document.getElementById('groupsDisplay').innerHTML = ''; 
+      document.getElementById('homeView').classList.remove('active');
+      document.getElementById('classView').classList.add('active');
+      renderStudents();
+    }
+
+    /* CLASS MANAGEMENT */
+    function addClass() {
+      const input = document.getElementById('classNameInput');
+      const name = input.value.trim();
+      if (!name) return;
+
+      classes.push({ id: Date.now(), name: name, students: [] });
+      input.value = '';
+      saveData();
+      renderClasses();
+    }
+
+    function editClassName(id, event) {
+      event.stopPropagation();
+      const currentClass = classes.find(c => c.id === id);
+      if (!currentClass) return;
+
+      const newName = prompt("Enter new class name:", currentClass.name);
+      if (newName && newName.trim() !== "") {
+        currentClass.name = newName.trim();
+        saveData();
+        renderClasses();
+      }
+    }
+
+    function editCurrentClassName() {
+      if (!currentClassId) return;
+      const currentClass = classes.find(c => c.id === currentClassId);
+      if (!currentClass) return;
+
+      const newName = prompt("Enter new class name:", currentClass.name);
+      if (newName && newName.trim() !== "") {
+        currentClass.name = newName.trim();
+        document.getElementById('currentClassName').innerText = currentClass.name;
+        saveData();
+      }
+    }
+
+    function deleteClass(id, event) {
+      event.stopPropagation();
+      classes = classes.filter(c => c.id !== id);
+      saveData();
+      renderClasses();
+    }
+
+    function renderClasses() {
+      const container = document.getElementById('classList');
+      container.innerHTML = '';
+
+      if (classes.length === 0) {
+        container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #7f8c8d;">No classes created yet. Add one above!</p>';
+        return;
+      }
+
+      classes.forEach(c => {
+        const card = document.createElement('div');
+        card.className = 'card class-card';
+        card.onclick = () => openClass(c.id);
+        card.innerHTML = `
+          <button class="delete-btn" onclick="deleteClass(${c.id}, event)">&times;</button>
+          <div class="avatar" style="background:#e8f4fd;">📚</div>
+          <div class="class-name">
+            ${escapeHtml(c.name)}
+            <button class="edit-icon-btn" onclick="editClassName(${c.id}, event)" title="Edit Name">✏️</button>
+          </div>
+          <div style="color: #7f8c8d; font-size: 0.9rem;">${c.students.length} Students</div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    /* STUDENT MANAGEMENT */
+    function addStudent() {
+      const input = document.getElementById('studentInput');
+      const name = input.value.trim();
+      if (!name || !currentClassId) return;
+
+      const currentClass = classes.find(c => c.id === currentClassId);
+      const randomAvatar = avatars[Math.floor(Math.random() * avatars.length)];
+      
+      currentClass.students.push({
+        id: Date.now(),
+        name: name,
+        points: 0,
+        avatar: randomAvatar,
+        isCustomAvatar: false
+      });
+
+      input.value = '';
+      saveData();
+      renderStudents();
+    }
+
+    function editStudentName(studentId) {
+      const currentClass = classes.find(c => c.id === currentClassId);
+      const student = currentClass.students.find(s => s.id === studentId);
+      if (!student) return;
+
+      const newName = prompt("Enter new student name:", student.name);
+      if (newName && newName.trim() !== "") {
+        student.name = newName.trim();
+        saveData();
+        renderStudents();
+      }
+    }
+
+    function handleAvatarUpload(studentId, event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const currentClass = classes.find(c => c.id === currentClassId);
+        const student = currentClass.students.find(s => s.id === studentId);
+        if (student) {
+          student.avatar = e.target.result;
+          student.isCustomAvatar = true;
+          saveData();
+          renderStudents();
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function deleteStudent(studentId) {
+      const currentClass = classes.find(c => c.id === currentClassId);
+      currentClass.students = currentClass.students.filter(s => s.id !== studentId);
+      saveData();
+      renderStudents();
+    }
+
+    function renderStudents() {
+      const grid = document.getElementById('studentGrid');
+      grid.innerHTML = '';
+
+      const currentClass = classes.find(c => c.id === currentClassId);
+      if (!currentClass) return;
+
+      currentClass.students.forEach(student => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        
+        const avatarHTML = student.isCustomAvatar 
+          ? `<img src="${student.avatar}" alt="Avatar">`
+          : student.avatar;
+
+        card.innerHTML = `
+          <button class="delete-btn" onclick="deleteStudent(${student.id})">&times;</button>
+          <div class="avatar-wrapper">
+            <div class="avatar">${avatarHTML}</div>
+            <label class="avatar-upload-label" for="upload-${student.id}" title="Change Picture">📷</label>
+            <input type="file" id="upload-${student.id}" class="avatar-upload-input" accept="image/*" onchange="handleAvatarUpload(${student.id}, event)">
+          </div>
+          <div class="student-name">
+            ${escapeHtml(student.name)}
+            <button class="edit-icon-btn" onclick="editStudentName(${student.id})" title="Edit Name">✏️</button>
+          </div>
+          <div class="points-badge">${student.points}</div>
+          <div class="point-actions">
+            <button class="btn-sub" onclick="openFeedbackModal('single', ${student.id}, 'negative')">- Point</button>
+            <button class="btn-add" onclick="openFeedbackModal('single', ${student.id}, 'positive')">+ Point</button>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    /* RANDOM PICKER */
+    function pickRandomStudent() {
+      const currentClass = classes.find(c => c.id === currentClassId);
+      if (!currentClass || currentClass.students.length === 0) {
+        document.getElementById('pickerDisplay').innerText = "No students!";
+        return;
+      }
+      
+      let counter = 0;
+      const display = document.getElementById('pickerDisplay');
+      
+      const interval = setInterval(() => {
+        const tempIndex = Math.floor(Math.random() * currentClass.students.length);
+        display.innerText = currentClass.students[tempIndex].name;
+        counter++;
+        
+        if (counter > 10) {
+          clearInterval(interval);
+          const finalIndex = Math.floor(Math.random() * currentClass.students.length);
+          display.innerText = "🎉 " + currentClass.students[finalIndex].name;
+        }
+      }, 100);
+    }
+
+    /* GROUP MAKER */
+    function createGroups() {
+      const currentClass = classes.find(c => c.id === currentClassId);
+      const container = document.getElementById('groupsDisplay');
+      container.innerHTML = '';
+
+      if (!currentClass || currentClass.students.length === 0) {
+        alert("Please add students before creating groups.");
+        return;
+      }
+
+      const numGroups = parseInt(document.getElementById('groupCount').value);
+      if (numGroups < 1) return;
+
+      const shuffled = [...currentClass.students];
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+
+      const groups = Array.from({ length: Math.min(numGroups, shuffled.length) }, () => []);
+
+      shuffled.forEach((student, index) => {
+        groups[index % groups.length].push(student);
+      });
+
+      groups.forEach((group, index) => {
+        const groupCard = document.createElement('div');
+        groupCard.className = 'group-card';
+        
+        let listItems = group.map(s => {
+          const avatarMini = s.isCustomAvatar 
+            ? `<img src="${s.avatar}" class="group-avatar-mini" alt="">`
+            : `<span>${s.avatar}</span>`;
+          return `<li>${avatarMini} <span>${escapeHtml(s.name)}</span></li>`;
+        }).join('');
+        
+        groupCard.innerHTML = `
+          <h3>Group ${index + 1}</h3>
+          <ul>${listItems}</ul>
+        `;
+        container.appendChild(groupCard);
+      });
+    }
+
+    /* TIMER */
+    function setTimer() {
+      const mins = parseInt(document.getElementById('timerMins').value) || 0;
+      const secs = parseInt(document.getElementById('timerSecs').value) || 0;
+      
+      const totalSeconds = (mins * 60) + secs;
+      if (totalSeconds <= 0) return;
+
+      resetTimer();
+      timeLeft = totalSeconds;
+      updateTimerDisplay();
+
+      timerInterval = setInterval(() => {
+        if (timeLeft > 0) {
+          timeLeft--;
+          updateTimerDisplay();
+        } else {
+          clearInterval(timerInterval);
+          timerInterval = null;
+          playAudio('positive');
+          alert("Time's up!");
+        }
+      }, 1000);
+    }
+
+    function resetTimer() {
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+      }
+      timeLeft = 0;
+      updateTimerDisplay();
+    }
+
+    function updateTimerDisplay() {
+      const mins = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+      const secs = (timeLeft % 60).toString().padStart(2, '0');
+      document.getElementById('timerDisplay').innerText = `${mins}:${secs}`;
+    }
+
+    /* UTILS */
+    function escapeHtml(text) {
+      return text.replace(/[&<>"']/g, function(m) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+      });
+    }
+
+    // Init
+    renderClasses();
+    renderDashboardTitle();
+  </script>
+</body>
+</html>
